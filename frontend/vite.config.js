@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.GITHUB_ACTIONS ? '/codeAlpha_credit_scoring_model/' : '/',
   plugins: [
     react(),
     tailwindcss(),
