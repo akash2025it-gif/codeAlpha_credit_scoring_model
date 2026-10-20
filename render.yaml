@@ -1,0 +1,25 @@
+services:
+  # Backend API
+  - type: web
+    name: credit-scoring-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend/src && uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+
+  # Frontend Web Client
+  - type: web
+    name: credit-scoring-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    plan: free
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
