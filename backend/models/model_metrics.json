@@ -1,0 +1,383 @@
+{
+  "dataset_name": "Statlog (German Credit Data) - UCI Machine Learning Repository",
+  "total_samples": 1000,
+  "train_samples": 800,
+  "test_samples": 200,
+  "class_distribution": {
+    "creditworthy_ratio": 0.7,
+    "non_creditworthy_ratio": 0.3
+  },
+  "numerical_features": [
+    "duration_in_month",
+    "credit_amount",
+    "installment_rate_percent_income",
+    "present_residence_since",
+    "age_in_years",
+    "number_existing_credits",
+    "number_people_liable_maintenance",
+    "monthly_installment",
+    "estimated_annual_income",
+    "loan_to_income_ratio",
+    "debt_to_income_ratio",
+    "financial_resilience_score",
+    "credit_burden_factor"
+  ],
+  "categorical_features": [
+    "status_existing_checking_account",
+    "credit_history",
+    "purpose",
+    "savings_account_bonds",
+    "present_employment_since",
+    "personal_status_and_sex",
+    "other_debtors_guarantors",
+    "property",
+    "other_installment_plans",
+    "housing",
+    "job",
+    "telephone",
+    "foreign_worker"
+  ],
+  "best_model_name": "Random Forest",
+  "models_evaluated": [
+    "Logistic Regression",
+    "Decision Tree",
+    "Random Forest"
+  ],
+  "metrics": {
+    "Logistic Regression": {
+      "accuracy": 0.685,
+      "precision": 0.8407,
+      "recall": 0.6786,
+      "f1_score": 0.751,
+      "roc_auc": 0.7613,
+      "confusion_matrix": {
+        "true_negative": 42,
+        "false_positive": 18,
+        "false_negative": 45,
+        "true_positive": 95
+      },
+      "roc_curve": [
+        {
+          "fpr": 0.0,
+          "tpr": 0.0
+        },
+        {
+          "fpr": 0.0167,
+          "tpr": 0.05
+        },
+        {
+          "fpr": 0.05,
+          "tpr": 0.2714
+        },
+        {
+          "fpr": 0.0833,
+          "tpr": 0.4643
+        },
+        {
+          "fpr": 0.1167,
+          "tpr": 0.55
+        },
+        {
+          "fpr": 0.15,
+          "tpr": 0.5643
+        },
+        {
+          "fpr": 0.2167,
+          "tpr": 0.6143
+        },
+        {
+          "fpr": 0.25,
+          "tpr": 0.6429
+        },
+        {
+          "fpr": 0.3667,
+          "tpr": 0.7286
+        },
+        {
+          "fpr": 0.4167,
+          "tpr": 0.7429
+        },
+        {
+          "fpr": 0.5,
+          "tpr": 0.7857
+        },
+        {
+          "fpr": 0.5333,
+          "tpr": 0.8286
+        },
+        {
+          "fpr": 0.5833,
+          "tpr": 0.8786
+        },
+        {
+          "fpr": 0.6333,
+          "tpr": 0.8929
+        },
+        {
+          "fpr": 0.6833,
+          "tpr": 0.9071
+        },
+        {
+          "fpr": 0.7167,
+          "tpr": 0.9214
+        },
+        {
+          "fpr": 0.75,
+          "tpr": 0.9429
+        },
+        {
+          "fpr": 0.8333,
+          "tpr": 0.9643
+        },
+        {
+          "fpr": 0.9167,
+          "tpr": 0.9857
+        },
+        {
+          "fpr": 1.0,
+          "tpr": 1.0
+        }
+      ]
+    },
+    "Decision Tree": {
+      "accuracy": 0.61,
+      "precision": 0.7719,
+      "recall": 0.6286,
+      "f1_score": 0.6929,
+      "roc_auc": 0.6692,
+      "confusion_matrix": {
+        "true_negative": 34,
+        "false_positive": 26,
+        "false_negative": 52,
+        "true_positive": 88
+      },
+      "roc_curve": [
+        {
+          "fpr": 0.0,
+          "tpr": 0.0
+        },
+        {
+          "fpr": 0.0667,
+          "tpr": 0.0714
+        },
+        {
+          "fpr": 0.0667,
+          "tpr": 0.1786
+        },
+        {
+          "fpr": 0.1333,
+          "tpr": 0.4429
+        },
+        {
+          "fpr": 0.1667,
+          "tpr": 0.4786
+        },
+        {
+          "fpr": 0.1667,
+          "tpr": 0.4929
+        },
+        {
+          "fpr": 0.1833,
+          "tpr": 0.5286
+        },
+        {
+          "fpr": 0.3833,
+          "tpr": 0.6214
+        },
+        {
+          "fpr": 0.4333,
+          "tpr": 0.6286
+        },
+        {
+          "fpr": 0.6,
+          "tpr": 0.75
+        },
+        {
+          "fpr": 0.6167,
+          "tpr": 0.7571
+        },
+        {
+          "fpr": 0.65,
+          "tpr": 0.7857
+        },
+        {
+          "fpr": 0.65,
+          "tpr": 0.8429
+        },
+        {
+          "fpr": 0.65,
+          "tpr": 0.85
+        },
+        {
+          "fpr": 0.9,
+          "tpr": 0.95
+        },
+        {
+          "fpr": 0.9,
+          "tpr": 0.9571
+        },
+        {
+          "fpr": 1.0,
+          "tpr": 1.0
+        }
+      ]
+    },
+    "Random Forest": {
+      "accuracy": 0.71,
+      "precision": 0.8417,
+      "recall": 0.7214,
+      "f1_score": 0.7769,
+      "roc_auc": 0.7858,
+      "confusion_matrix": {
+        "true_negative": 41,
+        "false_positive": 19,
+        "false_negative": 39,
+        "true_positive": 101
+      },
+      "roc_curve": [
+        {
+          "fpr": 0.0,
+          "tpr": 0.0
+        },
+        {
+          "fpr": 0.0167,
+          "tpr": 0.2286
+        },
+        {
+          "fpr": 0.05,
+          "tpr": 0.2429
+        },
+        {
+          "fpr": 0.0833,
+          "tpr": 0.3571
+        },
+        {
+          "fpr": 0.1167,
+          "tpr": 0.45
+        },
+        {
+          "fpr": 0.15,
+          "tpr": 0.55
+        },
+        {
+          "fpr": 0.1833,
+          "tpr": 0.5786
+        },
+        {
+          "fpr": 0.2167,
+          "tpr": 0.6143
+        },
+        {
+          "fpr": 0.25,
+          "tpr": 0.6286
+        },
+        {
+          "fpr": 0.2667,
+          "tpr": 0.7143
+        },
+        {
+          "fpr": 0.3167,
+          "tpr": 0.75
+        },
+        {
+          "fpr": 0.3833,
+          "tpr": 0.7643
+        },
+        {
+          "fpr": 0.4167,
+          "tpr": 0.8286
+        },
+        {
+          "fpr": 0.4667,
+          "tpr": 0.8429
+        },
+        {
+          "fpr": 0.5,
+          "tpr": 0.8571
+        },
+        {
+          "fpr": 0.5333,
+          "tpr": 0.9071
+        },
+        {
+          "fpr": 0.6,
+          "tpr": 0.95
+        },
+        {
+          "fpr": 0.8,
+          "tpr": 0.9571
+        },
+        {
+          "fpr": 0.8833,
+          "tpr": 0.9714
+        },
+        {
+          "fpr": 1.0,
+          "tpr": 1.0
+        }
+      ]
+    }
+  },
+  "top_feature_importances": [
+    {
+      "feature": "status_existing_checking_account_no_checking_account",
+      "importance": 0.1209
+    },
+    {
+      "feature": "monthly_installment",
+      "importance": 0.0708
+    },
+    {
+      "feature": "credit_amount",
+      "importance": 0.0639
+    },
+    {
+      "feature": "credit_burden_factor",
+      "importance": 0.0612
+    },
+    {
+      "feature": "estimated_annual_income",
+      "importance": 0.0597
+    },
+    {
+      "feature": "loan_to_income_ratio",
+      "importance": 0.057
+    },
+    {
+      "feature": "age_in_years",
+      "importance": 0.0506
+    },
+    {
+      "feature": "duration_in_month",
+      "importance": 0.0466
+    },
+    {
+      "feature": "financial_resilience_score",
+      "importance": 0.0452
+    },
+    {
+      "feature": "status_existing_checking_account_negative_balance",
+      "importance": 0.0331
+    },
+    {
+      "feature": "credit_history_critical_account",
+      "importance": 0.0267
+    },
+    {
+      "feature": "purpose_car_used",
+      "importance": 0.0177
+    },
+    {
+      "feature": "savings_account_bonds_under_100",
+      "importance": 0.0176
+    },
+    {
+      "feature": "present_residence_since",
+      "importance": 0.017
+    },
+    {
+      "feature": "other_installment_plans_none",
+      "importance": 0.0165
+    }
+  ]
+}
