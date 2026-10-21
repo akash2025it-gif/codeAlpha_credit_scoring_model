@@ -1,0 +1,3 @@
+# Dependencies for Vercel's Python function. Keep this at the repository root
+# so Vercel installs them when deploying the full-stack project.
+-r backend/requirements.txt

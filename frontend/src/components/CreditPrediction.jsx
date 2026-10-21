@@ -50,6 +50,7 @@ export default function CreditPrediction({ initialPreset, onPredictionSuccess })
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const isCreditworthy = result?.prediction_code === 1;
 
   // Sync with preset if loaded from Dashboard
   useEffect(() => {
@@ -486,20 +487,20 @@ export default function CreditPrediction({ initialPreset, onPredictionSuccess })
 
               {/* Decision Hero Banner */}
               <div className={`p-5 rounded-xl border text-center ${
-                result.prediction === 1
+                isCreditworthy
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                   : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
               }`}>
                 <div className="inline-flex p-3 rounded-full bg-slate-900/80 mb-2">
-                  {result.prediction === 1 ? (
+                  {isCreditworthy ? (
                     <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                   ) : (
                     <AlertCircle className="w-8 h-8 text-rose-400" />
                   )}
                 </div>
-                <h3 className="text-2xl font-black tracking-tight">{result.prediction_label}</h3>
+                <h3 className="text-2xl font-black tracking-tight">{result.prediction}</h3>
                 <p className="text-xs mt-1 text-slate-300">
-                  Risk Category: <strong className="text-white">{result.risk_category}</strong>
+                  Risk Category: <strong className="text-white">{result.risk_level}</strong>
                 </p>
               </div>
 
@@ -579,9 +580,9 @@ export default function CreditPrediction({ initialPreset, onPredictionSuccess })
                 </div>
               )}
 
-              {result.history_record_id && (
+              {result.record_id && (
                 <p className="text-[11px] text-slate-500 text-center">
-                  Logged to SQLite Audit Trail as Record #{result.history_record_id}
+                  Logged to SQLite Audit Trail as Record #{result.record_id}
                 </p>
               )}
             </div>

@@ -8,7 +8,13 @@ import json
 from datetime import datetime
 from typing import List, Dict, Any
 
-DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+# Vercel function deployments have a read-only project filesystem.  Store the
+# best-effort SQLite audit log in its writable temporary directory there.
+DB_DIR = (
+    os.path.join("/tmp", "credit_scoring_data")
+    if os.environ.get("VERCEL")
+    else os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+)
 DB_PATH = os.path.join(DB_DIR, "predictions.db")
 
 def get_db_connection():
