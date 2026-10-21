@@ -13,9 +13,12 @@ PROJECT_ROOT = BACKEND_DIR.parent
 DATA_DIR = BACKEND_DIR / "data"
 MODELS_DIR = BACKEND_DIR / "models"
 
-# Ensure directories exist
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-MODELS_DIR.mkdir(parents=True, exist_ok=True)
+# Vercel functions run from a read-only deployment bundle. The model and data
+# artifacts are packaged with that bundle, so inference must only read them.
+# Local and container deployments may still create their working directories.
+if not os.environ.get("VERCEL"):
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 # File Paths
 DATASET_CSV = DATA_DIR / "german_credit.csv"
