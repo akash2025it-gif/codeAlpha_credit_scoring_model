@@ -20,10 +20,20 @@ DB_DIR = (
 DB_PATH = os.path.join(DB_DIR, "predictions.db")
 
 def get_db_connection():
-    os.makedirs(DB_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    global DB_PATH
+    try:
+        os.makedirs(DB_DIR, exist_ok=True)
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    except Exception:
+        # Fallback to writable /tmp directory if local data dir is read-only (e.g. serverless)
+        tmp_dir = os.path.join("/tmp", "credit_scoring_data")
+        os.makedirs(tmp_dir, exist_ok=True)
+        DB_PATH = os.path.join(tmp_dir, "predictions.db")
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
 
 def hash_password(password: str, salt: Optional[str] = None) -> tuple[str, str]:
     """Generates a secure PBKDF2-HMAC-SHA256 password hash and salt."""

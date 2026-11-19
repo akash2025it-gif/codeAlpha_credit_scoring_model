@@ -468,15 +468,17 @@ The repository is configured for full-stack monorepo deployment on Vercel:
      ],
      "functions": {
        "api/index.py": {
-         "includeFiles": "{backend/src/**,backend/models/**,backend/data/**}"
+         "includeFiles": "backend/**"
        }
      }
    }
    ```
 2. **Serverless Entry Point (`api/index.py`):**
    Mounts the FastAPI application at `/api` and root, with an automatic in-memory fallback trainer that guarantees continuous availability if Python environment versions differ between development and serverless runtimes.
-3. **Root `package.json`:**
-   Provides universal build scripts for Vercel's build pipeline.
+3. **Root `package.json` & `api/requirements.txt`:**
+   Provides universal build scripts for Vercel's build pipeline and dedicated serverless runtime dependencies.
+4. **College Demonstration & Private Deployment Protection:**
+   To restrict access during academic evaluations, enable Vercel Deployment Protection in **Project Settings -> Security -> Deployment Protection -> Password Protection**. Visitors will be prompted for a password before viewing the deployed application. Authenticated underwriting actions inside the app are secured via PBKDF2-HMAC-SHA256 credentials (`demo_analyst` / `Password@123`).
 
 ### Deploying via Vercel CLI
 ```bash

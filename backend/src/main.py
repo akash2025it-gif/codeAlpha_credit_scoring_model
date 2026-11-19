@@ -4,7 +4,7 @@ FastAPI Application for AI-Based Credit Scoring and Creditworthiness Prediction 
 
 from contextlib import asynccontextmanager
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Header, Query, status, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Query, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import (
@@ -16,9 +16,15 @@ from database import (
 from prediction import prediction_engine, PredictionRequest, PredictionResponse
 from auth import router as auth_router, get_current_user_optional
 
+# Immediate safe pre-initialization for serverless warm starts
+try:
+    init_db()
+    prediction_engine.load_artifacts()
+except Exception as _pre_err:
+    print(f"[Init Notice] Pre-initialization notice: {_pre_err}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize SQLite database schema
     init_db()
     prediction_engine.load_artifacts()
     print("[API] System ready. SQLite DB, Auth system, and trained ML models initialized.")
@@ -40,10 +46,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount Authentication router
-app.include_router(auth_router)
+api_router = APIRouter()
+api_router.include_router(auth_router)
 
-@app.get("/health", tags=["Health"])
+@api_router.get("/health", tags=["Health"])
 def health():
     """
     Returns health status of the API and active machine learning model.
@@ -54,12 +60,12 @@ def health():
         "status": "healthy",
         "service": "AI-Based Credit Scoring and Creditworthiness Prediction System",
         "active_model": best_model,
-        "active_best_model": best_model,          # used by Navbar status badge
+        "active_best_model": best_model,
         "models_available": list(prediction_engine.all_models.keys()),
         "database": "SQLite connected"
     }
 
-@app.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
+@api_router.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
 def predict(request: PredictionRequest, authorization: Optional[str] = Header(None)):
     """
     Submits applicant financial parameters and returns:
@@ -82,7 +88,7 @@ def predict(request: PredictionRequest, authorization: Optional[str] = Header(No
             detail=f"Prediction error: {str(e)}"
         )
 
-@app.get("/model-metrics", tags=["Model Evaluation"])
+@api_router.get("/model-metrics", tags=["Model Evaluation"])
 def model_metrics():
     """
     Returns genuine holdout test evaluation metrics for:
@@ -99,7 +105,7 @@ def model_metrics():
         )
     return metrics
 
-@app.get("/prediction-history", tags=["Prediction History"])
+@api_router.get("/prediction-history", tags=["Prediction History"])
 def prediction_history(
     limit: int = Query(default=50, ge=1, le=500),
     user_only: bool = Query(default=False),
@@ -120,7 +126,7 @@ def prediction_history(
             detail=f"Database error: {str(e)}"
         )
 
-@app.get("/prediction-history/{prediction_id}", tags=["Prediction History"])
+@api_router.get("/prediction-history/{prediction_id}", tags=["Prediction History"])
 def get_prediction_detail(prediction_id: int):
     """Retrieves a single credit assessment audit record by its unique ID."""
     record = get_prediction_by_id(prediction_id)
@@ -132,16 +138,15 @@ def get_prediction_detail(prediction_id: int):
     return record
 
 # Backward-compatibility alias
-@app.get("/history", tags=["Prediction History"], include_in_schema=False)
+@api_router.get("/history", tags=["Prediction History"], include_in_schema=False)
 def get_history_alias(limit: int = 50):
     return prediction_history(limit=limit)
 
-@app.delete("/prediction-history", tags=["Prediction History"])
+@api_router.delete("/prediction-history", tags=["Prediction History"])
 def delete_prediction_history(authorization: Optional[str] = Header(None)):
     """Clears SQLite demonstration history."""
     try:
         user = get_current_user_optional(authorization)
-        # If user is logged in, optionally only clear user's or clear all demo
         clear_prediction_history()
         return {"status": "success", "message": "Prediction history cleared."}
     except Exception as e:
@@ -150,9 +155,28 @@ def delete_prediction_history(authorization: Optional[str] = Header(None)):
             detail=f"Database error: {str(e)}"
         )
 
-@app.delete("/history", tags=["Prediction History"], include_in_schema=False)
+@api_router.delete("/history", tags=["Prediction History"], include_in_schema=False)
 def delete_history_alias():
     return delete_prediction_history()
+
+# Mount API router under BOTH /api prefix and root prefix
+# This guarantees 100% path matching across Vercel rewrites, GitHub Pages, and local uvicorn!
+app.include_router(api_router, prefix="/api")
+app.include_router(api_router, prefix="")
+
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "service": "AI-Based Credit Scoring and Creditworthiness Prediction System",
+        "endpoints": {
+            "health": "/api/health",
+            "predict": "/api/predict",
+            "model_metrics": "/api/model-metrics",
+            "history": "/api/prediction-history",
+            "docs": "/docs"
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn

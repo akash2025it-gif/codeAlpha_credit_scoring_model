@@ -1,9 +1,52 @@
 /**
  * Frontend API Service Layer for CrediScore AI Credit Scoring System.
- * Connects to FastAPI backend endpoints with token management and auth headers.
+ * Connects to FastAPI backend endpoints with token management, auth headers,
+ * and resilient multi-host fallback (Vercel production / Vercel preview / local).
  */
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+const BASE_URLS = [
+  (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, ''),
+  'https://code-alpha-credit-scoring-model.vercel.app/api',
+  'https://code-alpha-credit-scoring-model-three.vercel.app/api',
+  'http://127.0.0.1:8000'
+].filter((url, index, self) => url && self.indexOf(url) === index);
+
+let activeBaseUrl = BASE_URLS[0];
+
+/**
+ * Resilient HTTP fetcher that tries the primary endpoint, and if a network
+ * error or server 500/502/503 occurs, tries alternate known endpoints.
+ */
+async function fetchWithFallback(endpointPath, options = {}) {
+  const path = endpointPath.startsWith('/') ? endpointPath : `/${endpointPath}`;
+
+  // 1. Try activeBaseUrl first
+  try {
+    const res = await fetch(`${activeBaseUrl}${path}`, options);
+    if (res.status !== 500 && res.status !== 502 && res.status !== 503) {
+      return res;
+    }
+  } catch (err) {
+    // Network / CORS error, proceed to fallback candidates
+  }
+
+  // 2. Iterate remaining candidate endpoints
+  for (const candidate of BASE_URLS) {
+    if (candidate === activeBaseUrl) continue;
+    try {
+      const res = await fetch(`${candidate}${path}`, options);
+      if (res.ok || (res.status >= 400 && res.status < 500)) {
+        activeBaseUrl = candidate; // Lock onto the working endpoint
+        return res;
+      }
+    } catch {
+      // Continue to next candidate
+    }
+  }
+
+  // 3. Fallback to active base url
+  return fetch(`${activeBaseUrl}${path}`, options);
+}
 
 // -------------------------------------------------------------
 // Token Helpers
@@ -43,7 +86,7 @@ function getAuthHeaders() {
 // -------------------------------------------------------------
 
 export async function loginUser(usernameOrEmail, password) {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+  const response = await fetchWithFallback('/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -63,7 +106,7 @@ export async function loginUser(usernameOrEmail, password) {
 }
 
 export async function registerUser(userData) {
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+  const response = await fetchWithFallback('/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(userData)
@@ -82,7 +125,7 @@ export async function registerUser(userData) {
 export async function fetchCurrentUser() {
   const token = getAuthToken();
   if (!token) return null;
-  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+  const response = await fetchWithFallback('/auth/me', {
     headers: getAuthHeaders()
   });
   if (!response.ok) {
@@ -95,7 +138,7 @@ export async function fetchCurrentUser() {
 }
 
 export async function updateProfile(profileData) {
-  const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+  const response = await fetchWithFallback('/auth/profile', {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(profileData)
@@ -108,7 +151,7 @@ export async function updateProfile(profileData) {
 }
 
 export async function changePassword(currentPassword, newPassword) {
-  const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+  const response = await fetchWithFallback('/auth/change-password', {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
@@ -125,7 +168,7 @@ export async function changePassword(currentPassword, newPassword) {
 
 export async function logoutUser() {
   try {
-    await fetch(`${API_BASE_URL}/auth/logout`, {
+    await fetchWithFallback('/auth/logout', {
       method: 'POST',
       headers: getAuthHeaders()
     });
@@ -141,7 +184,7 @@ export async function logoutUser() {
 // -------------------------------------------------------------
 
 export async function fetchHealth() {
-  const response = await fetch(`${API_BASE_URL}/health`);
+  const response = await fetchWithFallback('/health');
   if (!response.ok) {
     throw new Error(`Health check failed: ${response.statusText}`);
   }
@@ -149,7 +192,7 @@ export async function fetchHealth() {
 }
 
 export async function submitPrediction(payload) {
-  const response = await fetch(`${API_BASE_URL}/predict`, {
+  const response = await fetchWithFallback('/predict', {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(payload),
@@ -162,7 +205,7 @@ export async function submitPrediction(payload) {
 }
 
 export async function fetchModelMetrics() {
-  const response = await fetch(`${API_BASE_URL}/model-metrics`);
+  const response = await fetchWithFallback('/model-metrics');
   if (!response.ok) {
     throw new Error(`Failed to load model metrics: ${response.statusText}`);
   }
@@ -170,7 +213,7 @@ export async function fetchModelMetrics() {
 }
 
 export async function fetchPredictionHistory(limit = 50, userOnly = false) {
-  const response = await fetch(`${API_BASE_URL}/prediction-history?limit=${limit}&user_only=${userOnly}`, {
+  const response = await fetchWithFallback(`/prediction-history?limit=${limit}&user_only=${userOnly}`, {
     headers: getAuthHeaders()
   });
   if (!response.ok) {
@@ -180,7 +223,7 @@ export async function fetchPredictionHistory(limit = 50, userOnly = false) {
 }
 
 export async function fetchPredictionDetail(predictionId) {
-  const response = await fetch(`${API_BASE_URL}/prediction-history/${predictionId}`, {
+  const response = await fetchWithFallback(`/prediction-history/${predictionId}`, {
     headers: getAuthHeaders()
   });
   if (!response.ok) {
@@ -190,7 +233,7 @@ export async function fetchPredictionDetail(predictionId) {
 }
 
 export async function clearPredictionHistory() {
-  const response = await fetch(`${API_BASE_URL}/prediction-history`, {
+  const response = await fetchWithFallback('/prediction-history', {
     method: 'DELETE',
     headers: getAuthHeaders()
   });

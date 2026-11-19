@@ -10,7 +10,7 @@
   ],
   "functions": {
     "api/index.py": {
-      "includeFiles": "{backend/src/**,backend/models/**,backend/data/**}"
+      "includeFiles": "backend/**"
     }
   }
 }
