@@ -2,9 +2,15 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "cd frontend && npm ci && npm run build",
   "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index.py"
+    }
+  ],
   "functions": {
     "api/index.py": {
-      "includeFiles": "{backend/src/**,backend/models/**,backend/data/german_credit.csv}"
+      "includeFiles": "{backend/src/**,backend/models/**,backend/data/**}"
     }
   }
 }

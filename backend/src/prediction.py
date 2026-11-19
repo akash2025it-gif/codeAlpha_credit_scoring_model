@@ -82,14 +82,95 @@ class PredictionEngine:
         self.load_artifacts()
 
     def load_artifacts(self):
-        """Loads serialized models and metadata."""
-        if BEST_MODEL_PATH.exists():
-            self.best_model = joblib.load(BEST_MODEL_PATH)
-        if ALL_MODELS_PATH.exists():
-            self.all_models = joblib.load(ALL_MODELS_PATH)
-        if METRICS_JSON_PATH.exists():
-            with open(METRICS_JSON_PATH, "r") as f:
-                self.metrics_metadata = json.load(f)
+        """Loads serialized models and metadata safely, with in-memory fallback."""
+        try:
+            if BEST_MODEL_PATH.exists():
+                self.best_model = joblib.load(BEST_MODEL_PATH)
+        except Exception as e:
+            print(f"[PredictionEngine] Warning: Could not load best_model.joblib: {e}")
+            self.best_model = None
+
+        try:
+            if ALL_MODELS_PATH.exists():
+                self.all_models = joblib.load(ALL_MODELS_PATH)
+        except Exception as e:
+            print(f"[PredictionEngine] Warning: Could not load all_models.joblib: {e}")
+            self.all_models = {}
+
+        try:
+            if METRICS_JSON_PATH.exists():
+                with open(METRICS_JSON_PATH, "r") as f:
+                    self.metrics_metadata = json.load(f)
+        except Exception as e:
+            print(f"[PredictionEngine] Warning: Could not load model_metrics.json: {e}")
+            self.metrics_metadata = {}
+
+        # If models could not be loaded from joblib (e.g. across Python/sklearn versions on cloud),
+        # train in-memory on the fly using the benchmark dataset.
+        if self.best_model is None or not self.all_models:
+            self._train_fallback_models()
+
+    def _train_fallback_models(self):
+        """
+        In-memory fallback training when pre-serialized joblib files cannot be loaded
+        (e.g., across Python or scikit-learn version mismatches on serverless environments).
+        Trains genuine models on the UCI German Credit dataset in-memory.
+        """
+        try:
+            from config import DATASET_CSV
+            from preprocessing import load_dataset, clean_data, engineer_features, build_preprocessor
+            from sklearn.model_selection import train_test_split
+            from sklearn.pipeline import Pipeline
+            from sklearn.linear_model import LogisticRegression
+            from sklearn.tree import DecisionTreeClassifier
+            from sklearn.ensemble import RandomForestClassifier
+
+            if not DATASET_CSV.exists():
+                print(f"[PredictionEngine] Dataset not found at {DATASET_CSV}, skipping in-memory train")
+                return
+
+            print("[PredictionEngine] Training genuine models in-memory from dataset...")
+            df = load_dataset()
+            df_clean = clean_data(df)
+            df_feat = engineer_features(df_clean)
+
+            target_col = "credit_risk"
+            X = df_feat.drop(columns=[target_col])
+            y = df_feat[target_col].astype(int)
+
+            numerical_cols = X.select_dtypes(include=["int64", "float64"]).columns.tolist()
+            categorical_cols = X.select_dtypes(include=["object", "str", "string"]).columns.tolist()
+
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.20, random_state=42, stratify=y
+            )
+
+            preprocessor = build_preprocessor(numerical_cols, categorical_cols)
+
+            models = {
+                "Logistic Regression": LogisticRegression(max_iter=1000, C=0.5, class_weight="balanced", random_state=42),
+                "Decision Tree": DecisionTreeClassifier(max_depth=5, min_samples_split=10, min_samples_leaf=5, class_weight="balanced", random_state=42),
+                "Random Forest": RandomForestClassifier(n_estimators=120, max_depth=8, min_samples_split=6, min_samples_leaf=3, class_weight="balanced", random_state=42)
+            }
+
+            for name, clf in models.items():
+                pipe = Pipeline(steps=[
+                    ("preprocessor", preprocessor),
+                    ("classifier", clf)
+                ])
+                pipe.fit(X_train, y_train)
+                self.all_models[name] = pipe
+
+            self.best_model = self.all_models.get("Random Forest")
+            if not self.metrics_metadata:
+                self.metrics_metadata = {
+                    "best_model_name": "Random Forest",
+                    "models_evaluated": list(self.all_models.keys()),
+                    "total_samples": len(df_feat)
+                }
+            print("[PredictionEngine] In-memory fallback training completed successfully.")
+        except Exception as e:
+            print(f"[PredictionEngine] In-memory training failed: {e}")
 
     def determine_risk_level(self, probability: float) -> str:
         """Classifies risk level based on model probability."""
