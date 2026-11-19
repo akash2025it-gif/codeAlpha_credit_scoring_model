@@ -44,6 +44,7 @@ def health():
         "status": "healthy",
         "service": "AI-Based Credit Scoring and Creditworthiness Prediction System",
         "active_model": best_model,
+        "active_best_model": best_model,          # used by Navbar status badge
         "models_available": list(prediction_engine.all_models.keys()),
         "database": "SQLite connected"
     }
