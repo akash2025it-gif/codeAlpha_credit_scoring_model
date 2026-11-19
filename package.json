@@ -4,7 +4,7 @@
   "private": true,
   "description": "AI-Based Credit Scoring and Creditworthiness Prediction System",
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
+    "build": "node build.js",
     "start": "python backend/src/main.py"
   }
 }
