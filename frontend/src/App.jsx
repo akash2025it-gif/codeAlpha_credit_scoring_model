@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import Toast from './components/Toast';
 
 import DashboardPage from './pages/DashboardPage';
 import PredictionPage from './pages/PredictionPage';
@@ -18,6 +19,11 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [toast, setToast] = useState(null); // { message, type }
+
+  const showToast = useCallback((message, type = 'info') => {
+    setToast({ message, type });
+  }, []);
 
   // Load initial backend health, metrics, and history
   const loadData = async () => {
@@ -68,7 +74,13 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handlePredictionSuccess = () => {
+  const handlePredictionSuccess = (result) => {
+    showToast(
+      result?.prediction_label
+        ? `Decision: ${result.prediction_label} — Credit Score ${Math.round(300 + result.probability * 550)}`
+        : 'Prediction completed successfully.',
+      result?.prediction_code === 1 ? 'success' : 'error'
+    );
     // Refresh history
     fetchPredictionHistory()
       .then(res => setHistory(res.history || []))
@@ -113,6 +125,7 @@ export default function App() {
             onRefreshHistory={() => {
               fetchPredictionHistory().then(res => setHistory(res.history || []));
             }}
+            onClearSuccess={() => showToast('Prediction history cleared.', 'info')}
           />
         )}
 
@@ -122,6 +135,15 @@ export default function App() {
       </main>
 
       <Footer setActiveTab={setActiveTab} />
+
+      {/* Global Toast Notifications */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

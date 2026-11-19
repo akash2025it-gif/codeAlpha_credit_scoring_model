@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { clearPredictionHistory } from '../api';
 
-export default function PredictionHistory({ history, onRefreshHistory }) {
+export default function PredictionHistory({ history, onRefreshHistory, onClearSuccess }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [riskFilter, setRiskFilter] = useState('ALL');
   const [decisionFilter, setDecisionFilter] = useState('ALL');
@@ -40,6 +40,9 @@ export default function PredictionHistory({ history, onRefreshHistory }) {
       await clearPredictionHistory();
       if (onRefreshHistory) {
         onRefreshHistory();
+      }
+      if (onClearSuccess) {
+        onClearSuccess();
       }
     } catch (err) {
       alert("Failed to clear history: " + err.message);
