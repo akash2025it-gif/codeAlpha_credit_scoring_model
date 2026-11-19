@@ -1,0 +1,10 @@
+{
+  "name": "ai-credit-scoring-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-Based Credit Scoring and Creditworthiness Prediction System",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "python backend/src/main.py"
+  }
+}

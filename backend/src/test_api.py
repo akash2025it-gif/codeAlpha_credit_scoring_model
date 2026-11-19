@@ -1,9 +1,8 @@
 """
-Smoke test for Credit Scoring Backend Service and SQLite.
+Smoke test for Credit Scoring Backend Engine and SQLite.
 """
 
-from service import scoring_service
-from schemas import CreditPredictionRequest
+from prediction import prediction_engine, PredictionRequest
 from database import init_db, get_recent_predictions
 
 def run_tests():
@@ -11,12 +10,12 @@ def run_tests():
     init_db()
     
     print("2. Checking model loading...")
-    metrics = scoring_service.get_metrics()
+    metrics = prediction_engine.metrics_metadata
     print(f"   Best model: {metrics.get('best_model_name')}")
-    print(f"   Available models: {list(scoring_service.all_models.keys())}")
+    print(f"   Available models: {list(prediction_engine.all_models.keys())}")
     
     print("\n3. Testing Prediction for a Creditworthy applicant...")
-    good_req = CreditPredictionRequest(
+    good_req = PredictionRequest(
         applicant_name="Alice Smith (Stable)",
         duration_in_month=12,
         credit_amount=1500.0,
@@ -39,13 +38,13 @@ def run_tests():
         telephone="registered",
         foreign_worker="no"
     )
-    good_res = scoring_service.predict(good_req)
-    print(f"   Alice Result: {good_res.prediction_label} (Prob: {good_res.probability}, Score: {good_res.risk_score}, Category: {good_res.risk_category})")
+    good_res = prediction_engine.predict(good_req)
+    print(f"   Alice Result: {good_res.prediction} (Prob: {good_res.probability}, Score: {good_res.risk_score}, Category: {good_res.risk_level})")
     print(f"   DTI: {good_res.financial_ratios.debt_to_income_ratio}%, LTI: {good_res.financial_ratios.loan_to_income_ratio}")
     print(f"   Drivers count: {len(good_res.key_drivers)}")
 
     print("\n4. Testing Prediction for a High-Risk applicant...")
-    risky_req = CreditPredictionRequest(
+    risky_req = PredictionRequest(
         applicant_name="Bob Miller (Strained)",
         duration_in_month=48,
         credit_amount=12000.0,
@@ -68,8 +67,8 @@ def run_tests():
         telephone="none",
         foreign_worker="yes"
     )
-    risky_res = scoring_service.predict(risky_req)
-    print(f"   Bob Result: {risky_res.prediction_label} (Prob: {risky_res.probability}, Score: {risky_res.risk_score}, Category: {risky_res.risk_category})")
+    risky_res = prediction_engine.predict(risky_req)
+    print(f"   Bob Result: {risky_res.prediction} (Prob: {risky_res.probability}, Score: {risky_res.risk_score}, Category: {risky_res.risk_level})")
     print(f"   DTI: {risky_res.financial_ratios.debt_to_income_ratio}%, LTI: {risky_res.financial_ratios.loan_to_income_ratio}")
 
     print("\n5. Checking SQLite history persistence...")

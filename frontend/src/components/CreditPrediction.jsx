@@ -45,7 +45,7 @@ const DEFAULT_FORM = {
   model_name: "Random Forest"
 };
 
-export default function CreditPrediction({ initialPreset, onPredictionSuccess }) {
+export default function CreditPrediction({ initialPreset, onPredictionSuccess, onViewFullResult }) {
   const [formData, setFormData] = useState(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -578,6 +578,17 @@ export default function CreditPrediction({ initialPreset, onPredictionSuccess })
                     <span className="font-mono text-white font-semibold">${result.financial_ratios.monthly_installment}</span>
                   </div>
                 </div>
+              )}
+
+              {onViewFullResult && (
+                <button
+                  type="button"
+                  onClick={() => onViewFullResult(result)}
+                  className="w-full py-2.5 px-3 rounded-xl bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Open Dedicated Report & Analysis</span>
+                </button>
               )}
 
               {result.record_id && (

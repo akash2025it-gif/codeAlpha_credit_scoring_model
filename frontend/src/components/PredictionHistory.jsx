@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { clearPredictionHistory } from '../api';
 
-export default function PredictionHistory({ history, onRefreshHistory, onClearSuccess }) {
+export default function PredictionHistory({ history, onRefreshHistory, onClearSuccess, onSelectDetail }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [riskFilter, setRiskFilter] = useState('ALL');
   const [decisionFilter, setDecisionFilter] = useState('ALL');
@@ -302,13 +302,26 @@ export default function PredictionHistory({ history, onRefreshHistory, onClearSu
               </p>
             </div>
 
-            {/* Close Button */}
-            <div className="pt-2">
+            {/* Actions */}
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+              {onSelectDetail && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rec = selectedRecord;
+                    setSelectedRecord(null);
+                    onSelectDetail(rec);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition-all cursor-pointer"
+                >
+                  Open Dedicated Audit Page
+                </button>
+              )}
               <button
                 onClick={() => setSelectedRecord(null)}
-                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer"
+                className="py-2.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs cursor-pointer"
               >
-                Close Audit Detail
+                Close
               </button>
             </div>
           </div>

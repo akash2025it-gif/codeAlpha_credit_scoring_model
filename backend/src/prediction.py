@@ -251,7 +251,7 @@ class PredictionEngine:
 
         return drivers
 
-    def predict(self, req: PredictionRequest) -> PredictionResponse:
+    def predict(self, req: PredictionRequest, user_id: Optional[int] = None) -> PredictionResponse:
         """Executes full ML prediction pipeline and returns structured response."""
         model_name = req.model_name or self.metrics_metadata.get("best_model_name", "Random Forest")
         pipeline = self.all_models.get(model_name, self.best_model)
@@ -337,7 +337,8 @@ class PredictionEngine:
                 probability=round(creditworthy_prob, 4),
                 risk_category=risk_level,
                 explanation_summary=explanation,
-                raw_input=req.dict()
+                raw_input=req.dict(),
+                user_id=user_id
             )
         except Exception as e:
             print(f"[PredictionEngine] SQLite persistence warning: {e}")
