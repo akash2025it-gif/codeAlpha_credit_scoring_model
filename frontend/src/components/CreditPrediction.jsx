@@ -473,7 +473,61 @@ export default function CreditPrediction({ initialPreset, onPredictionSuccess, o
 
         {/* Prediction Result Display Column */}
         <div className="lg:col-span-5 space-y-6">
-          {result ? (
+          {loading ? (
+            <div className="bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xl animate-fadeIn relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Automated Underwriting Engine</span>
+                </div>
+                <span className="text-[11px] font-mono text-slate-500">{formData.model_name}</span>
+              </div>
+
+              <div className="text-center py-4">
+                <div className="inline-flex p-4 rounded-2xl bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 mb-4 animate-pulse">
+                  <Cpu className="w-10 h-10" />
+                </div>
+                <h3 className="text-xl font-bold text-white tracking-tight">Analyzing Financial Profile</h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                  Executing machine learning pipeline on {formData.applicant_name}&apos;s credit application.
+                </p>
+              </div>
+
+              {/* Progress Steps */}
+              <div className="space-y-3 bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 text-xs">
+                <div className="flex items-center gap-3 text-slate-300">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  </div>
+                  <span>1. Validating 20 regulatory financial parameters</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-300">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  </div>
+                  <span>2. Synthesizing DTI ({estDti}%) and LTI ({estLti}x) ratios</span>
+                </div>
+                <div className="flex items-center gap-3 text-indigo-300 animate-pulse font-medium">
+                  <div className="w-5 h-5 rounded-full bg-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  </div>
+                  <span>3. Running {formData.model_name} inference & probability</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-500">
+                  <div className="w-5 h-5 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center shrink-0 text-[10px] font-bold">
+                    4
+                  </div>
+                  <span>4. Deriving explainable AI decision drivers</span>
+                </div>
+              </div>
+
+              <div className="text-center text-[11px] text-slate-500 font-mono">
+                Computing standardized 300–850 creditworthiness score...
+              </div>
+            </div>
+          ) : result ? (
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6 shadow-xl sticky top-20 animate-fadeIn">
               {/* Header Badge */}
               <div className="flex items-center justify-between">

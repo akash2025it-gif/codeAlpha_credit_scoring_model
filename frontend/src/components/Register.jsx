@@ -9,7 +9,9 @@ import {
   ArrowRight, 
   AlertCircle, 
   Loader2, 
-  CheckCircle2 
+  CheckCircle2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { registerUser } from '../services/api';
 
@@ -23,8 +25,27 @@ export default function Register({ onRegisterSuccess, setActiveTab }) {
     role: 'Credit Risk Analyst',
     department: 'Credit Underwriting & Risk'
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Compute password strength (0 to 4 score)
+  const getPasswordStrength = (pwd) => {
+    if (!pwd) return { score: 0, label: 'None', color: 'bg-slate-700' };
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+    if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-rose-500', textColor: 'text-rose-400' };
+    if (score === 2) return { score: 2, label: 'Fair', color: 'bg-amber-500', textColor: 'text-amber-400' };
+    if (score === 3) return { score: 3, label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-400' };
+    return { score: 4, label: 'Strong', color: 'bg-emerald-500', textColor: 'text-emerald-400' };
+  };
+
+  const strength = getPasswordStrength(formData.password);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -188,14 +209,22 @@ export default function Register({ onRegisterSuccess, setActiveTab }) {
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3 pointer-events-none" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••••••"
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-9 py-2 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  className="absolute right-2.5 top-2.5 text-slate-500 hover:text-slate-300 p-0.5 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
               </div>
             </div>
 
@@ -206,17 +235,47 @@ export default function Register({ onRegisterSuccess, setActiveTab }) {
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3 pointer-events-none" />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirm_password"
                   value={formData.confirm_password}
                   onChange={handleChange}
                   placeholder="••••••••••••"
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-9 py-2 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  tabIndex={-1}
+                  className="absolute right-2.5 top-2.5 text-slate-500 hover:text-slate-300 p-0.5 cursor-pointer"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
               </div>
             </div>
           </div>
+
+          {/* Password Strength Indicator */}
+          {formData.password && (
+            <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-3 space-y-2 animate-fadeIn">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">Security Strength:</span>
+                <span className={`font-semibold font-mono ${strength.textColor}`}>{strength.label}</span>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5 h-1.5 w-full">
+                <div className={`rounded-full transition-all ${strength.score >= 1 ? strength.color : 'bg-slate-800'}`} />
+                <div className={`rounded-full transition-all ${strength.score >= 2 ? strength.color : 'bg-slate-800'}`} />
+                <div className={`rounded-full transition-all ${strength.score >= 3 ? strength.color : 'bg-slate-800'}`} />
+                <div className={`rounded-full transition-all ${strength.score >= 4 ? strength.color : 'bg-slate-800'}`} />
+              </div>
+              <div className="flex flex-wrap gap-2 text-[10px] text-slate-500 pt-0.5">
+                <span className={formData.password.length >= 8 ? 'text-emerald-400 font-medium' : ''}>• 8+ chars</span>
+                <span className={/[A-Z]/.test(formData.password) ? 'text-emerald-400 font-medium' : ''}>• 1 uppercase</span>
+                <span className={/[0-9]/.test(formData.password) ? 'text-emerald-400 font-medium' : ''}>• 1 number</span>
+                <span className={/[^A-Za-z0-9]/.test(formData.password) ? 'text-emerald-400 font-medium' : ''}>• 1 special char</span>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"

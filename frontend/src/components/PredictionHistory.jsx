@@ -19,6 +19,7 @@ export default function PredictionHistory({ history, onRefreshHistory, onClearSu
   const [riskFilter, setRiskFilter] = useState('ALL');
   const [decisionFilter, setDecisionFilter] = useState('ALL');
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
 
   // Filter history items
@@ -31,13 +32,11 @@ export default function PredictionHistory({ history, onRefreshHistory, onClearSu
   });
 
   // Handle Clear History
-  const handleClear = async () => {
-    if (!window.confirm("Are you sure you want to clear the entire SQLite prediction audit log?")) {
-      return;
-    }
+  const executeClear = async () => {
     setClearing(true);
     try {
       await clearPredictionHistory();
+      setShowClearConfirm(false);
       if (onRefreshHistory) {
         onRefreshHistory();
       }
@@ -101,7 +100,7 @@ export default function PredictionHistory({ history, onRefreshHistory, onClearSu
             Export CSV
           </button>
           <button
-            onClick={handleClear}
+            onClick={() => setShowClearConfirm(true)}
             disabled={clearing || !history || history.length === 0}
             className="px-3.5 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer"
           >
@@ -322,6 +321,40 @@ export default function PredictionHistory({ history, onRefreshHistory, onClearSu
                 className="py-2.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs cursor-pointer"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl animate-fadeIn text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white">Clear All Audit Records?</h3>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                This action will delete all recorded prediction evaluations from the persistent SQLite database. This cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(false)}
+                className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeClear}
+                disabled={clearing}
+                className="flex-1 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold cursor-pointer shadow-md shadow-rose-600/30 transition-all disabled:opacity-50"
+              >
+                {clearing ? 'Clearing...' : 'Yes, Clear Log'}
               </button>
             </div>
           </div>
