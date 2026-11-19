@@ -35,7 +35,7 @@ jobs:
         env:
           # GitHub Pages is static, so it must call the deployed Vercel API
           # directly instead of its own /api path.
-          VITE_API_BASE_URL: https://code-alpha-credit-scoring-model-three.vercel.app
+          VITE_API_BASE_URL: https://code-alpha-credit-scoring-model-three.vercel.app/api
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

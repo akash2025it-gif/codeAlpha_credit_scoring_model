@@ -4,11 +4,7 @@
   "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.py": {
-      "includeFiles": [
-        "backend/src/**",
-        "backend/models/**",
-        "backend/data/german_credit.csv"
-      ]
+      "includeFiles": "{backend/src/**,backend/models/**,backend/data/german_credit.csv}"
     }
   }
 }
